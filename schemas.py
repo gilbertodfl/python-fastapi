@@ -47,6 +47,7 @@ class AdicionarItemPedidoSchema(BaseModel):
     preco_unitario: float
     class Config:
         from_attributes = True
+
 class ResponsePedidosSchema(BaseModel):
     id: int
     status: str
