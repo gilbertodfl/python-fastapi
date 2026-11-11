@@ -21,13 +21,19 @@ git clone https://github.com/gilbertodfl/python-fastapi.git
 python3 -m venv .venv 
 source .venv/bin/activate
 pip install --upgrade pip
+
+## instala o que está no requirements.txt
 pip install -r requirements.txt
+
+
 ```
 
 ### COMO CHAMAR NO COMANDO DE LINHA
 
 ```plaintext
 uvicorn main:app --reload
+
+No browser digite: http://127.0.0.1:8000/docs
 ```
 
 Onde:
@@ -81,6 +87,11 @@ A forma no FASTAPI é diferente: 
 alembic revision --autogenerate -m 'adicionar items ao pedido'
 alembic upgrade head
 ```
+
+#JWT
+
+https://www.jwt.io/
+
 
 Veja também:
 

@@ -17,15 +17,15 @@ async def pedidos():
     """
     return {"mensagem": "Você acessou a rota de pedidos"}
 
-@order_router.post("/pedido")
-async def criar_pedido(pedido_schema: PedidoSchema, session: Session = Depends(pegar_sessao)):
-    """
-        Aqui é onde criamos o pedido. Lembre-se de logar primeiro para obter o token. 
-    """
-    novo_pedido = Pedido(usuario=pedido_schema.id_usuario)
-    session.add(novo_pedido)
-    session.commit()
-    return {"mensagem": f"Pedido criado com sucesso. ID do pedido: {novo_pedido.id}"}
+# @order_router.post("/pedido")
+# async def criar_pedido(pedido_schema: PedidoSchema, session: Session = Depends(pegar_sessao)):
+#     """
+#         Aqui é onde criamos o pedido. Lembre-se de logar primeiro para obter o token. 
+#     """
+#     novo_pedido = Pedido(usuario=pedido_schema.id_usuario)
+#     session.add(novo_pedido)
+#     session.commit()
+#     return {"mensagem": f"Pedido criado com sucesso. ID do pedido: {novo_pedido.id}"}
 
 @order_router.post("/pedido/cancelar/{id_pedido}")
 async def cancelar_pedido(id_pedido: int, session: Session = Depends(pegar_sessao), usuario: Usuario = Depends(verificar_token)):
@@ -37,7 +37,7 @@ async def cancelar_pedido(id_pedido: int, session: Session = Depends(pegar_sessa
     
     if not pedido:
         raise HTTPException(status_code=404, detail="Pedido não encontrado")
-    if pedido.usuario != usuario.id:
+    if not usuario.admin  and pedido.usuario != usuario.id:
         raise HTTPException(status_code=403, detail="Você não tem permissão para cancelar este pedido")
     pedido.status = "CANCELADO"
     session.commit()
@@ -133,8 +133,12 @@ async def remover_item(id_item_pedido: int,
     session.delete(item_pedido)
     pedido.calcular_preco()    
     session.commit()
+    
+    ## observe que  "pedido": item_pedido vai mostrar os itens do pedido atual.
+    ## Serão os itens do pedido que restaram após a remoção do item. Dependendo da situação não é interessante.
     return {"mensagem": f"Item removido com sucesso. ID do item: {item_pedido.id}",
              "preco_pedido": pedido.preco,
+             "quantidade_itens_pedido": len(pedido.itens),
              "pedido": item_pedido
            }
 
@@ -215,7 +219,9 @@ async def listar_pedidos_usuario(session: Session = Depends(pegar_sessao), usuar
 async def listar_pedidos_usuario(session: Session = Depends(pegar_sessao), usuario: Usuario = Depends(verificar_token)):
     """
       Diferente de /listar-pedidos-usuario, aqui vamos usar o schema definido em schemas.py para retornar os pedidos do usuário.
+      
       veja na função que temos response_model=List[ResponsePedidosSchema]
+
       Nao esqueça de importar  em schemas o ResponsePedidosSchema e from typing import List 
     """
     pedidos = session.query(Pedido).filter(Pedido.usuario == usuario.id).all()

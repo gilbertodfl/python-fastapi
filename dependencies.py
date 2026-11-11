@@ -13,6 +13,13 @@ def pegar_sessao():
     finally:
         session.close()
 
+
+
+###Como funciona o Depends no FastAPI
+###O Depends é o sistema de injeção de dependências do FastAPI.
+#  A ideia: em vez de você mesmo chamar uma função dentro da rota, você declara que a rota precisa do
+# resultado dessa função, e o FastAPI se encarrega de executá-la antes e entregar o resultado pronto.
+
 def verificar_token(token: str = Depends(oauth2_schema), session: Session = Depends(pegar_sessao)):
     try:
         dic_info = jwt.decode(token, SECRET_KEY, ALGORITHM)

@@ -13,6 +13,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 app = FastAPI()
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+## Aqui estamos definindo o esquema de autenticação OAuth2 com senha e token JWT
+## aqui abre um formmulário de login para o usuário digitar email e senha, e depois gerar o token JWT
+## é chamado no arquivo dependencies.py na função verificar_token, que é usada para proteger as rotas que precisam de autenticação
 oauth2_schema = OAuth2PasswordBearer(tokenUrl="auth/login-form")
 
 from auth_routes import auth_router
