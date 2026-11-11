@@ -10,6 +10,8 @@ from typing import List
 
 order_router = APIRouter(prefix="/pedidos", tags=["pedidos"], dependencies=[Depends(verificar_token)])
 
+## aqui não tem autenticação nesta chamada,  mas todas as rotas do order_router tem autenticação, pois o order_router foi criado com dependencies=[Depends(verificar_token)]
+## então será necessário passar o token JWT no header Authorization: Bearer <token> para acessar as rotas em /pedidos
 @order_router.get("/")
 async def pedidos():
     """
@@ -17,15 +19,15 @@ async def pedidos():
     """
     return {"mensagem": "Você acessou a rota de pedidos"}
 
-# @order_router.post("/pedido")
-# async def criar_pedido(pedido_schema: PedidoSchema, session: Session = Depends(pegar_sessao)):
-#     """
-#         Aqui é onde criamos o pedido. Lembre-se de logar primeiro para obter o token. 
-#     """
-#     novo_pedido = Pedido(usuario=pedido_schema.id_usuario)
-#     session.add(novo_pedido)
-#     session.commit()
-#     return {"mensagem": f"Pedido criado com sucesso. ID do pedido: {novo_pedido.id}"}
+@order_router.post("/pedido")
+async def criar_pedido(pedido_schema: PedidoSchema, session: Session = Depends(pegar_sessao)):
+    """
+        Aqui é onde criamos o pedido. Lembre-se de logar primeiro para obter o token. 
+    """
+    novo_pedido = Pedido(usuario=pedido_schema.id_usuario)
+    session.add(novo_pedido)
+    session.commit()
+    return {"mensagem": f"Pedido criado com sucesso. ID do pedido: {novo_pedido.id}"}
 
 @order_router.post("/pedido/cancelar/{id_pedido}")
 async def cancelar_pedido(id_pedido: int, session: Session = Depends(pegar_sessao), usuario: Usuario = Depends(verificar_token)):

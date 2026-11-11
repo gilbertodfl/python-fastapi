@@ -10,10 +10,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
-
 def criar_token(id_usuario, duracao_token=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)):
     data_expiracao = datetime.now(timezone.utc) + duracao_token
     dic_info = {"sub": str(id_usuario), "exp": data_expiracao}
+    print(f"dic_info: {dic_info}")
     jwt_codificado = jwt.encode(dic_info, SECRET_KEY, ALGORITHM)
     return jwt_codificado
 
@@ -25,7 +25,7 @@ def autenticar_usuario(email, senha, session):
         return False
     return usuario
 
-
+## Como essa rota não tem dependencies=[Depends(verificar_token)], então ela não precisa de autenticação para ser acessada. Qualquer pessoa pode acessar essa rota.
 @auth_router.get("/")
 async def home():
     """
