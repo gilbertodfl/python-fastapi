@@ -87,6 +87,31 @@ A forma no FASTAPI é diferente: 
 alembic revision --autogenerate -m 'adicionar items ao pedido'
 alembic upgrade head
 ```
+## alembic
+
+https://medium.com/@evembijo/beginners-guide-to-alembic-and-sqlalchemy-in-python-manage-your-database-like-a-pro-9395b5b5080d
+
+
+
+
+    Não esqueça de configurar no alembic.ini o acesso ao database: ( linha 66 mais ou menos )
+
+    sqlalchemy.url = sqlite:///banco.db
+
+#### criando o ambiente alembic
+alembic init alembic
+alembic revision --autogenerate -m "create my db"    
+
+aplicando atualização: alembic upgrade head
+
+### principais comandos alembic:
+
+    alembic init alembic — Initialize Alembic in your project
+    alembic revision --autogenerate -m "message" — Generate migration script automatically
+    alembic upgrade head — Apply latest migrations
+    alembic downgrade -1 — Undo the last migration (go back one version)
+    alembic history — See migration history
+
 
 #JWT
 
