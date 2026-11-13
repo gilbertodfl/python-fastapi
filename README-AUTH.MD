@@ -12,10 +12,37 @@ Há dois tokens emitidos no login JSON (`POST /auth/login`):
 | `access_token` | `ACCESS_TOKEN_EXPIRE_MINUTES` | Acessar rotas protegidas, como `/pedidos/*`. |
 | `refresh_token` | 7 dias | Solicitar um novo `access_token` em `/auth/refresh`. |
 
-O cliente envia o token no cabeçalho HTTP abaixo; não envie a senha novamente para cada requisição:
+## veja o arquivo env
+
+  💣 Por tratar de um exemplo, não vi problema de colocar a chave, mas não faça isto em produção!
+```plaintext
+SECRET_KEY=0yQIfXdr3KpUXBIPLT1LWflqLLDFXrPs
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+```
+## Vantagem do token depois de autenticado. 
+O cliente envia o token no cabeçalho HTTP abaixo
 
 ```http
 Authorization: Bearer <token>
+```
+Não envie a senha novamente para cada requisição
+Veja o exemplo chamado de teste.py
+```python
+import requests
+
+headers = {
+    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzcyNDkxMTMzfQ.nJHKmiGe33nv4qrjtx6ApETTS-o3c5NQZjYBE1AkRJA"
+}
+
+requisicao = requests.get("http://127.0.0.1:8000/auth/refresh", headers=headers)
+print('Response da requisicao',requisicao)
+print('codigo da requisicao:', requisicao.status_code)
+
+print('requisicao.json():', requisicao.json())
+print('requisicao.headers:', requisicao.headers)
+print('requisicao.text:', requisicao.text)
+print('pegando o token do json da requisicao:', requisicao.json()['access_token']   )
 ```
 
 ## Fluxo completo
@@ -47,7 +74,8 @@ sequenceDiagram
     A-->>C: Novo access_token
 ```
 
-## Configuração
+## Configuração 
+### SECRET_KEY ALGORITHM ACCESS_TOKEN_EXPIRE_MINUTES:
 
 Crie um arquivo `.env` na raiz do projeto com valores seguros:
 
@@ -57,12 +85,12 @@ ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
 
-`main.py` carrega esses valores e configura o `OAuth2PasswordBearer` com `tokenUrl="auth/login-form"`. Essa configuração também é usada pelo Swagger/OpenAPI para indicar onde obter credenciais no fluxo de formulário.
+O `main.py` carrega esses valores de .env e configura o `OAuth2PasswordBearer` com `tokenUrl="auth/login-form"` (form de login). Essa configuração também é usada pelo Swagger/OpenAPI para indicar onde obter credenciais no fluxo de formulário.
 
-## Endpoints de autenticação
+
+## Endpoints de autenticação 
 
 ### Criar conta — `POST /auth/criar_conta`
-
 Recebe um `UsuarioSchema`, verifica se o e-mail já existe e armazena a senha usando hash bcrypt. A senha original não é salva no banco.
 
 ```json
@@ -123,6 +151,8 @@ curl http://127.0.0.1:8000/auth/refresh \
 ```
 
 O refresh token não é renovado nem devolvido novamente por esse endpoint; ele continua válido somente até sua expiração original de 7 dias. Quando expirar, o cliente deve fazer login outra vez.
+ auth_routes.py:
+  >refresh_token = criar_token(usuario.id, duracao_token=timedelta(days=7))
 
 ## Como uma rota protegida é executada
 
@@ -193,7 +223,7 @@ O token é **assinado**, não criptografado. Não coloque senha, dados pessoais 
 O fluxo funciona para fins de estudo, mas há pontos importantes antes de usá-lo em produção:
 
 - Access e refresh tokens têm o mesmo payload e são validados pela mesma função. Assim, no estado atual, um `access_token` válido também consegue chamar `/auth/refresh`. O ideal é incluir uma claim como `"type": "access"` ou `"type": "refresh"` e exigir `refresh` na rota de renovação.
-- Não há armazenamento, rotação, revogação ou lista de bloqueio de refresh tokens. Por isso, logout e comprometimento de token não invalidam um token já emitido.
+- Não há armazenamento, rotação, revogação ou lista de bloqueio de refresh tokens. Por isso, logout e comprometimento de token não invalidam um token já emitido (isto não necessariamente é um problema).
 - A verificação atual confirma que o usuário existe, mas não verifica `usuario.ativo`. Se contas inativas não devem acessar a API, essa checagem deve ser adicionada.
 - `GET /auth/refresh` cria um recurso credencial novo; por semântica HTTP e para reduzir exposição acidental, normalmente esse endpoint seria `POST`.
 - Use HTTPS em produção, uma `SECRET_KEY` forte fora do repositório e armazenamento seguro dos tokens no cliente.

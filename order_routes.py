@@ -7,7 +7,7 @@ from schemas import PedidoSchema, ItemPedidoSchema, AdicionarItemPedidoSchema, R
 from models import Pedido, Usuario, ItemPedido 
 from typing import List 
 
-
+## veja que todas as rotas dentro de /pedidos precisam de autenticação, pois o order_router foi criado com dependencies=[Depends(verificar_token)]
 order_router = APIRouter(prefix="/pedidos", tags=["pedidos"], dependencies=[Depends(verificar_token)])
 
 ## aqui não tem autenticação nesta chamada,  mas todas as rotas do order_router tem autenticação, pois o order_router foi criado com dependencies=[Depends(verificar_token)]
@@ -19,7 +19,7 @@ async def pedidos():
     """
     return {"mensagem": "Você acessou a rota de pedidos"}
 
-@order_router.post("/pedido")
+@order_router.post("/criar")
 async def criar_pedido(pedido_schema: PedidoSchema, session: Session = Depends(pegar_sessao)):
     """
         Aqui é onde criamos o pedido. Lembre-se de logar primeiro para obter o token. 

@@ -25,7 +25,8 @@ def autenticar_usuario(email, senha, session):
         return False
     return usuario
 
-## Como essa rota não tem dependencies=[Depends(verificar_token)], então ela não precisa de autenticação para ser acessada. Qualquer pessoa pode acessar essa rota.
+## Como essa rota não tem dependencies=[Depends(verificar_token)], então ela não precisa de autenticação para ser acessada.
+#  Qualquer pessoa pode acessar essa rota.
 @auth_router.get("/")
 async def home():
     """
@@ -73,7 +74,7 @@ async def login(login_schema: LoginSchema, session: Session = Depends(pegar_sess
             "token_type": "Bearer"
             }
 
-@auth_router.get("/refresh")
+@auth_router.post("/refresh")
 async def use_refresh_token(usuario: Usuario = Depends(verificar_token)):
     access_token = criar_token(usuario.id)
     return {
